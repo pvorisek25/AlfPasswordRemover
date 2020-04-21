@@ -31,6 +31,13 @@ SOFTWARE.
 
 #include "ziplib/Source/ZipLib/ZipFile.h"
 
+#if defined(unix) || defined(__unix__) || defined(__unix)
+#include <sys/stat.h>
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
+
 #define APR_NAME "AlfPasswordRemover"
 #define APR_VER "1.0"
 
@@ -50,9 +57,7 @@ void RemovePasswords(int fileCount, char** files);
 int main(int argc, char** argv)
 {
 	PrintInfo();
-	char* file[2] = { "1324.alf", "mytest.alf" };
-	
-	RemovePasswords(2, file);
+	RemovePasswords(argc, argv);
 	return 0;
 }
 
@@ -70,7 +75,7 @@ void PrintInfo(void)
 // CopySubstring
 // Copies defined part of given char array into another one
 //
-void CopySubstring(char* dest, char* src, int begin, int end, int destOffset = 0)
+void CopySubstring(char* dest, char* src, int begin, int end, int destOffset)
 {
 	int destIndex = destOffset;
 
@@ -139,22 +144,22 @@ void FindAndModify(char* charText, size_t size)
 
 	settingsStartPos = FindString(charText, size, settingsFlag, settingsFlagSize, 0);
 	settingsStartPos += settingsFlagSize;
-	settingsEndPos = FindString(charText, size, "»", strlen("»"), settingsStartPos + 1) - 1;
+	settingsEndPos = (size_t)FindString(charText, size, "»", strlen("»"), (int)settingsStartPos + 1) - 1;
 
 	size_t firstPartSize = settingsStartPos;
 	char* firstPart = new char[firstPartSize];
-	CopySubstring(firstPart, charText, 0, settingsStartPos);
+	CopySubstring(firstPart, charText, 0, (int)settingsStartPos);
 
 	size_t secondPartSize = size - settingsEndPos;
 	char* secondPart = new char[secondPartSize];
-	CopySubstring(secondPart, charText, settingsEndPos, size);
+	CopySubstring(secondPart, charText, (int)settingsEndPos, (int)size);
 
 	size_t newTextSize = firstPartSize + strlen("NaN,NaN") + secondPartSize;
 	char* newText = new char[newTextSize];
 
-	CopySubstring(newText, firstPart, 0, firstPartSize);
-	CopySubstring(newText, "NaN,NaN", 0, strlen("NaN,NaN"), firstPartSize);
-	CopySubstring(newText, secondPart, 0, strlen(secondPart), firstPartSize + strlen("NaN,NaN"));
+	CopySubstring(newText, firstPart, 0, (int)firstPartSize);
+	CopySubstring(newText, "NaN,NaN", 0, (int)strlen("NaN,NaN"), (int)firstPartSize);
+	CopySubstring(newText, secondPart, 0, (int)strlen(secondPart), (int)(firstPartSize + strlen("NaN,NaN")));
 
 	FILE* newFile;
 	newFile = fopen("tmp/test.alf", "wb");
@@ -172,7 +177,7 @@ void FindAndModify(char* charText, size_t size)
 // ReadFile
 // Reads the extracted file 
 //
-char* ReadFile(size_t* size, char* path = "tmp/test.alf")
+char* ReadFile(size_t* size, char* path)
 {
 	FILE* testFile;
 	testFile = fopen(path, "rb");
@@ -194,7 +199,7 @@ char* ReadFile(size_t* size, char* path = "tmp/test.alf")
 //
 void RemovePasswords(int fileCount, char** files)
 {
-	for (unsigned int i = 0; i < fileCount; i++)
+	for (int i = 1; i < fileCount; i++)
 	{
 		if (!FileExists(files[i]))
 		{
@@ -202,6 +207,12 @@ void RemovePasswords(int fileCount, char** files)
 			continue;
 		}
 
+#if defined(unix) || defined(__unix__) || defined(__unix)
+			mkdir("tmp", S_IRUSR | S_IWUSR);
+#elif defined(_WIN32)
+			CreateDirectory("tmp", NULL);
+#endif
+		
 		std::cout << "Removing password from " << files[i] << std::endl;
 		ZipFile::ExtractFile(files[i], "test.alf", "tmp/test.alf");
 
@@ -210,5 +221,13 @@ void RemovePasswords(int fileCount, char** files)
 
 		ZipFile::AddFile(files[i], "tmp/test.alf");
 		std::cout << "Password removed from " << files[i] << std::endl;
+
+		remove("tmp/test.alf");
+
+#if defined(unix) || defined(__unix__) || defined(__unix)
+		rmdir("tmp");
+#elif defined(_WIN32)
+		RemoveDirectory("tmp");
+#endif
 	}
 }

@@ -23,6 +23,7 @@ project "AlfPasswordRemover"
 	location "."
 	kind "ConsoleApp"
 	language "C++"
+	characterset("MBCS")
 
 	targetdir("bin/" .. outputdir)
 	objdir("bin-int/" .. outputdir)
@@ -43,6 +44,7 @@ project "AlfPasswordRemover"
 
 	filter "system:windows"
 		files "src/ziplib/Source/ZipLib/extlibs/lzma/*.c"
+		defines "_CRT_SECURE_NO_WARNINGS"
 
 	filter "system:linux"
 		files "src/ziplib/Source/ZipLib/extlibs/lzma/unix/*.c"
