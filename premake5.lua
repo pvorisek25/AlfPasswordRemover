@@ -48,6 +48,7 @@ project "AlfPasswordRemover"
 
 	filter "system:linux"
 		files "src/ziplib/Source/ZipLib/extlibs/lzma/unix/*.c"
+		links "pthread"
 
 	filter "configurations:Debug*"
 		symbols "On"

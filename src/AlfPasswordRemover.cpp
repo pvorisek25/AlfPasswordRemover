@@ -25,9 +25,8 @@ SOFTWARE.
 */
 
 #include <iostream>
-#include <filesystem>
 #include <fstream>
-#include <string>
+#include <string.h>
 
 #include "ziplib/Source/ZipLib/ZipFile.h"
 
@@ -144,7 +143,7 @@ void FindAndModify(char* charText, size_t size)
 
 	settingsStartPos = FindString(charText, size, settingsFlag, settingsFlagSize, 0);
 	settingsStartPos += settingsFlagSize;
-	settingsEndPos = (size_t)FindString(charText, size, "»", strlen("»"), (int)settingsStartPos + 1) - 1;
+	settingsEndPos = (size_t)FindString(charText, size, "ï¿½", strlen("ï¿½"), (int)settingsStartPos + 1) - 1;
 
 	size_t firstPartSize = settingsStartPos;
 	char* firstPart = new char[firstPartSize];
@@ -208,7 +207,7 @@ void RemovePasswords(int fileCount, char** files)
 		}
 
 #if defined(unix) || defined(__unix__) || defined(__unix)
-			mkdir("tmp", S_IRUSR | S_IWUSR);
+			mkdir("tmp", 777);
 #elif defined(_WIN32)
 			CreateDirectory("tmp", NULL);
 #endif
