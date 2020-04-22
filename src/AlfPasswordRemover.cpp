@@ -141,9 +141,11 @@ void FindAndModify(char* charText, size_t size)
 	size_t settingsStartPos = -1;
 	size_t settingsEndPos = -1;
 
+	char settingsEndChar = 49851;
+	
 	settingsStartPos = FindString(charText, size, settingsFlag, settingsFlagSize, 0);
 	settingsStartPos += settingsFlagSize;
-	settingsEndPos = (size_t)FindString(charText, size, "�", strlen("�"), (int)settingsStartPos + 1) - 1;
+	settingsEndPos = (size_t)FindString(charText, size, &settingsEndChar, 1, (int)settingsStartPos + 1) - 1;
 
 	size_t firstPartSize = settingsStartPos;
 	char* firstPart = new char[firstPartSize];
@@ -218,6 +220,8 @@ void RemovePasswords(int fileCount, char** files)
 		size_t size = 0;
 		FindAndModify(ReadFile(&size), size);
 
+		ZipFile::RemoveEntry(files[i], "test.alf");
+		
 		ZipFile::AddFile(files[i], "tmp/test.alf");
 		std::cout << "Password removed from " << files[i] << std::endl;
 
