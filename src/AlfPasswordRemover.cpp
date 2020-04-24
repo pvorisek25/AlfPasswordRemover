@@ -209,7 +209,7 @@ void RemovePasswords(int fileCount, char** files)
 		}
 
 #if defined(unix) || defined(__unix__) || defined(__unix)
-			mkdir("tmp", 777);
+			mkdir("tmp", 0666);
 #elif defined(_WIN32)
 			CreateDirectory("tmp", NULL);
 #endif
@@ -218,7 +218,8 @@ void RemovePasswords(int fileCount, char** files)
 		ZipFile::ExtractFile(files[i], "test.alf", "tmp/test.alf");
 
 		size_t size = 0;
-		FindAndModify(ReadFile(&size), size);
+		char* testText = ReadFile(&size);
+		FindAndModify(testText, size);
 
 		ZipFile::RemoveEntry(files[i], "test.alf");
 		

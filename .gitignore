@@ -9,3 +9,7 @@ bin-int/
 *.tlog
 Makefile
 *.make
+.codelite/
+*.mk
+*.project
+*.workspace
