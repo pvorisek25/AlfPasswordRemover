@@ -48,6 +48,8 @@ bool FileExists(char* path);
 void FindAndModify(char* charText, size_t size);
 char* ReadFile(size_t* size, char* path = "tmp/test.alf");
 void RemovePasswords(int fileCount, char** files);
+void CreateDir(char* path);
+void RemoveDir(char* path);
 
 //
 // main
@@ -165,19 +167,13 @@ void FindAndModify(char* charText, size_t size)
 	FILE* newFile;
 	newFile = fopen("tmp/test.alf", "wb");
 
-	if (newFile == NULL)
+	if (newFile != NULL)
 	{
-		std::cout << "Failed to open new file" << std::endl;
-		delete charText;
-		delete firstPart;
-		delete secondPart;
-		delete newText;
-
-		return;
+		fwrite(newText, newTextSize, 1, newFile);
+		fclose(newFile);
 	}
-	
-	fwrite(newText, newTextSize, 1, newFile);
-	fclose(newFile);
+	else
+		std::cout << "Failed to open new file" << std::endl;
 
 	delete charText;
 	delete firstPart;
@@ -222,11 +218,7 @@ void RemovePasswords(int fileCount, char** files)
 			continue;
 		}
 
-#if defined(unix) || defined(__unix__) || defined(__unix)
-		mkdir("tmp", 0666);
-#elif defined(_WIN32)
-		CreateDirectory("tmp", NULL);
-#endif
+		CreateDir("tmp");
 		
 		std::cout << "Removing password from " << files[i] << std::endl;
 		ZipFile::ExtractFile(files[i], "test.alf", "tmp/test.alf");
@@ -248,11 +240,32 @@ void RemovePasswords(int fileCount, char** files)
 		std::cout << "Password removed from " << files[i] << std::endl;
 
 		remove("tmp/test.alf");
-
-#if defined(unix) || defined(__unix__) || defined(__unix)
-		rmdir("tmp");
-#elif defined(_WIN32)
-		RemoveDirectory("tmp");
-#endif
+		RemoveDir("tmp");
 	}
+}
+
+//
+// CreateDir
+// Uses platform-specific functions to create defined directory
+//
+void CreateDir(char* path)
+{
+#if defined(unix) || defined(__unix__) || defined(__unix)
+	mkdir(path, 0666);
+#elif defined(_WIN32)
+	CreateDirectory(path, NULL);
+#endif
+}
+
+//
+// RemoveDir
+// Uses platform-specific functions to remove defined directory
+//
+void RemoveDir(char* path)
+{
+#if defined(unix) || defined(__unix__) || defined(__unix)
+	rmdir(path);
+#elif defined(_WIN32)
+	RemoveDirectory(path);
+#endif
 }
