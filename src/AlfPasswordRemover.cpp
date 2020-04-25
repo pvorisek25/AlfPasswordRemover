@@ -141,7 +141,7 @@ void FindAndModify(char* charText, size_t size)
 	size_t settingsStartPos = -1;
 	size_t settingsEndPos = -1;
 
-	char settingsEndChar = 49851;
+	char settingsEndChar = (char)49851;
 	
 	settingsStartPos = FindString(charText, size, settingsFlag, settingsFlagSize, 0);
 	settingsStartPos += settingsFlagSize;
@@ -165,6 +165,17 @@ void FindAndModify(char* charText, size_t size)
 	FILE* newFile;
 	newFile = fopen("tmp/test.alf", "wb");
 
+	if (newFile == NULL)
+	{
+		std::cout << "Failed to open new file" << std::endl;
+		delete charText;
+		delete firstPart;
+		delete secondPart;
+		delete newText;
+
+		return;
+	}
+	
 	fwrite(newText, newTextSize, 1, newFile);
 	fclose(newFile);
 
@@ -183,6 +194,9 @@ char* ReadFile(size_t* size, char* path)
 	FILE* testFile;
 	testFile = fopen(path, "rb");
 
+	if (testFile == NULL)
+		return NULL;
+	
 	fseek(testFile, 0, SEEK_END);
 	*size = ftell(testFile);
 	fseek(testFile, 0, SEEK_SET);
@@ -209,9 +223,9 @@ void RemovePasswords(int fileCount, char** files)
 		}
 
 #if defined(unix) || defined(__unix__) || defined(__unix)
-			mkdir("tmp", 0666);
+		mkdir("tmp", 0666);
 #elif defined(_WIN32)
-			CreateDirectory("tmp", NULL);
+		CreateDirectory("tmp", NULL);
 #endif
 		
 		std::cout << "Removing password from " << files[i] << std::endl;
@@ -219,6 +233,13 @@ void RemovePasswords(int fileCount, char** files)
 
 		size_t size = 0;
 		char* testText = ReadFile(&size);
+		
+		if (testText == NULL)
+		{
+			std::cout << "Failed to open " << files[i] << "'s test.alf" << std::endl;
+			continue;
+		}
+		
 		FindAndModify(testText, size);
 
 		ZipFile::RemoveEntry(files[i], "test.alf");
