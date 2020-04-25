@@ -46,7 +46,7 @@ void CopySubstring(char* dest, char* src, int begin, int end, int destOffset = 0
 int FindString(char* str1, size_t size1, char* str2, size_t size2, int offset);
 bool FileExists(char* path);
 void FindAndModify(char* charText, size_t size);
-char* ReadFile(size_t* size, char* path = "tmp/test.alf");
+char* ReadFile(size_t* size, char* path = (char*)"tmp/test.alf");
 void RemovePasswords(int fileCount, char** files);
 void CreateDir(char* path);
 void RemoveDir(char* path);
@@ -58,7 +58,16 @@ void RemoveDir(char* path);
 int main(int argc, char** argv)
 {
 	PrintInfo();
-	RemovePasswords(argc, argv);
+	
+#if defined(unix) || defined(__unix__) || defined(__unix)
+    if(getuid())
+    {
+        std::cout << "Run the program with root privileges!" << std::endl;
+        return -1;
+    }
+#endif
+    
+    RemovePasswords(argc, argv);
 	return 0;
 }
 
@@ -137,7 +146,7 @@ bool FileExists(char* path)
 //
 void FindAndModify(char* charText, size_t size)
 {
-	char* settingsFlag = "aqz_nastavenia=";
+	char* settingsFlag = (char*)"aqz_nastavenia=";
 	size_t settingsFlagSize = strlen(settingsFlag);
 
 	size_t settingsStartPos = -1;
@@ -161,7 +170,7 @@ void FindAndModify(char* charText, size_t size)
 	char* newText = new char[newTextSize];
 
 	CopySubstring(newText, firstPart, 0, (int)firstPartSize);
-	CopySubstring(newText, "NaN,NaN", 0, (int)strlen("NaN,NaN"), (int)firstPartSize);
+	CopySubstring(newText, (char*)"NaN,NaN", 0, (int)strlen("NaN,NaN"), (int)firstPartSize);
 	CopySubstring(newText, secondPart, 0, (int)strlen(secondPart), (int)(firstPartSize + strlen("NaN,NaN")));
 
 	FILE* newFile;
@@ -218,7 +227,7 @@ void RemovePasswords(int fileCount, char** files)
 			continue;
 		}
 
-		CreateDir("tmp");
+		CreateDir((char*)"tmp");
 		
 		std::cout << "Removing password from " << files[i] << std::endl;
 		ZipFile::ExtractFile(files[i], "test.alf", "tmp/test.alf");
@@ -240,7 +249,7 @@ void RemovePasswords(int fileCount, char** files)
 		std::cout << "Password removed from " << files[i] << std::endl;
 
 		remove("tmp/test.alf");
-		RemoveDir("tmp");
+		RemoveDir((char*)"tmp");
 	}
 }
 
