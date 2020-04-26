@@ -46,7 +46,7 @@ project "AlfPasswordRemover"
 		files "src/ziplib/Source/ZipLib/extlibs/lzma/*.c"
 		defines "_CRT_SECURE_NO_WARNINGS"
 
-	filter "system:linux"
+	filter "system:linux or system:unix or system:bsd"
 		files "src/ziplib/Source/ZipLib/extlibs/lzma/unix/*.c"
 		links "pthread"
 
