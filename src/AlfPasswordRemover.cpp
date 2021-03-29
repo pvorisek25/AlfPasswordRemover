@@ -57,16 +57,7 @@ void RemoveDir(char* path);
 //
 int main(int argc, char** argv)
 {
-	PrintInfo();
-	
-#if defined(unix) || defined(__unix__) || defined(__unix)
-    if(getuid())
-    {
-        std::cout << "Run the program with root privileges!" << std::endl;
-        return -1;
-    }
-#endif
-    
+    PrintInfo();
     RemovePasswords(argc, argv);
 	return 0;
 }
@@ -260,7 +251,7 @@ void RemovePasswords(int fileCount, char** files)
 void CreateDir(char* path)
 {
 #if defined(unix) || defined(__unix__) || defined(__unix)
-	mkdir(path, 0666);
+	mkdir(path, 0777);
 #elif defined(_WIN32)
 	CreateDirectory(path, NULL);
 #endif
